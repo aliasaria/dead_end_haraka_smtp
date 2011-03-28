@@ -7,6 +7,7 @@ var plugins = require('./plugins');
 var constants = require('./constants');
 var rfc1869   = require('./rfc1869');
 var haraka  = require('./haraka');
+var fs   = require('fs');
 
 var line_regexp = /^([^\n]*\n)/;
 
@@ -615,8 +616,35 @@ Connection.prototype.data_post_respond = function(retval, msg) {
                 break;
         default:
                 plugins.run_hooks("queue", this);
+					 
+					 saveEmails(this);
+					
+					 break;
     }
 };
+
+time = new Date().getTime();
+email_counter = 0;
+
+function saveEmails(connection) {
+	 var lines = connection.transaction.data_lines;
+    if (lines.length === 0) {
+        return;
+    }	
+	 
+	 console.log(time);
+	
+	 email_counter ++;
+	
+    fs.writeFile('./mail/mail_' + time + '_' + email_counter + '.eml', lines.join(''), function(err) {
+        if (err) {
+            return;
+        }
+        
+        return;
+    });
+}
+
 
 Connection.prototype.queue_respond = function(retval, msg) {
     this.reset_transaction();
